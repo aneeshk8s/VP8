@@ -1,0 +1,182 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    k8s.ovn.org/pod-networks: '{"default":{"ip_addresses":["10.217.0.43/23"],"mac_address":"0a:58:0a:d9:00:2b","gateway_ips":["10.217.0.1"],"routes":[{"dest":"10.217.0.0/22","nextHop":"10.217.0.1"},{"dest":"10.217.4.0/23","nextHop":"10.217.0.1"},{"dest":"169.254.0.5/32","nextHop":"10.217.0.1"},{"dest":"100.64.0.0/16","nextHop":"10.217.0.1"}],"ip_address":"10.217.0.43/23","gateway_ip":"10.217.0.1","role":"primary"}}'
+    k8s.v1.cni.cncf.io/network-status: |-
+      [{
+          "name": "ovn-kubernetes",
+          "interface": "eth0",
+          "ips": [
+              "10.217.0.43"
+          ],
+          "mac": "0a:58:0a:d9:00:2b",
+          "default": true,
+          "dns": {}
+      }]
+  creationTimestamp: "2026-08-04T05:08:17Z"
+  generation: 1
+  labels:
+    run: test
+  name: mypod
+  namespace: default
+  resourceVersion: "49662"
+  uid: cc6d0dbc-85bd-474e-99d7-90dd13e61327
+spec:
+  containers:
+  - image: nginx:latest
+    imagePullPolicy: Always
+    name: con1
+    ports:
+    - containerPort: 80
+      protocol: TCP
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-lc2fg
+      readOnly: true
+  - image: tomcat:latest
+    imagePullPolicy: Always
+    name: con2
+    ports:
+    - containerPort: 8080
+      protocol: TCP
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-lc2fg
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  imagePullSecrets:
+  - name: default-dockercfg-4hh74
+  nodeName: crc
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: kube-api-access-lc2fg
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+      - configMap:
+          items:
+          - key: service-ca.crt
+            path: service-ca.crt
+          name: openshift-service-ca.crt
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2026-08-04T05:09:14Z"
+    observedGeneration: 1
+    status: "True"
+    type: PodReadyToStartContainers
+  - lastProbeTime: null
+    lastTransitionTime: "2026-08-04T05:08:17Z"
+    observedGeneration: 1
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2026-08-04T05:09:14Z"
+    observedGeneration: 1
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2026-08-04T05:09:14Z"
+    observedGeneration: 1
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2026-08-04T05:08:17Z"
+    observedGeneration: 1
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: cri-o://2e25506e5e8221c6d39103e8888e2cbfaa8f7bc1ea5535ca55a794821e7240d6
+    image: docker.io/library/nginx:latest
+    imageID: docker.io/library/nginx@sha256:5a88c9c45479443d7be2eadc894b4ed0a9801bae03d97a5760ae13b5c2005942
+    lastState: {}
+    name: con1
+    ready: true
+    resources: {}
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2026-08-04T05:08:23Z"
+    user:
+      linux:
+        gid: 0
+        supplementalGroups:
+        - 0
+        uid: 0
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-lc2fg
+      readOnly: true
+      recursiveReadOnly: Disabled
+  - containerID: cri-o://6e376384839fe3935ea29ebee3bd08a505d5306de351d66e208c30f63d1fa500
+    image: docker.io/library/tomcat:latest
+    imageID: docker.io/library/tomcat@sha256:6fbf7bb2964e3cd240819f368218692aa411eb3eb4ba3fdd5922d33cce10ff41
+    lastState: {}
+    name: con2
+    ready: true
+    resources: {}
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2026-08-04T05:09:13Z"
+    user:
+      linux:
+        gid: 0
+        supplementalGroups:
+        - 0
+        uid: 0
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-lc2fg
+      readOnly: true
+      recursiveReadOnly: Disabled
+  hostIP: 192.168.126.11
+  hostIPs:
+  - ip: 192.168.126.11
+  observedGeneration: 1
+  phase: Running
+  podIP: 10.217.0.43
+  podIPs:
+  - ip: 10.217.0.43
+  qosClass: BestEffort
+  startTime: "2026-08-04T05:08:17Z"
