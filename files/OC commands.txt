@@ -1,0 +1,54 @@
+OpenShift Project Commands Cheat Sheet
+1. List OpenShift Projects
+
+To view all projects available to the current user:
+
+oc projects
+
+2. Create a New Project
+
+Create a new OpenShift project named mango:
+
+oc new-project mango
+
+
+Create another project named devops:
+
+oc new-project devops
+
+
+oc new-project creates the project and automatically switches your current context to that project.
+
+3. Switch Between Projects
+
+Switch to the mango project:
+
+oc project mango
+
+
+Switch to the devops project:
+
+oc project devops
+
+
+Check the currently active project:
+
+oc project
+
+4. Create an Application with oc new-app
+
+Create an application named webapp using the nginx:latest image:
+
+oc new-app --name=webapp nginx:latest
+
+
+Check the resources created:
+
+oc get all
+
+5. Create an Application from a Template
+
+Create an application using the nginx-example template:
+
+oc new-app --template nginx-example
+
