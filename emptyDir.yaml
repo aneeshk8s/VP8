@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: emvol
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mango
+  template:
+    metadata:
+      labels:
+        app: mango
+    spec:
+      containers:
+      - name: con1
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: myvol
+          mountPath: /app
+      - name: con2
+        image: tomcat:latest
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: myvol
+          mountPath: /data
+      volumes:
+      - name: myvol
+        emptyDir: {}
+      
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: mango-svc
+spec:
+  selector:
+    app: mango
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: mango-route
+spec:
+  port:
+    targetPort: 80
+  to:
+    kind: ""
+    name: mango-svc
+    weight: null
+
