@@ -1,0 +1,42 @@
+crc config set memory 15000
+
+enable monitoring 
+crc config set enable-cluster-monitoring true
+
+# --- Installation & Setup ---
+crc setup                           # Set up environment for CRC (drivers, configs, etc.)
+crc config view                     # View current CRC configuration
+crc config set <key> <value>        # Set a configuration option
+crc config unset <key>              # Remove a config option
+
+# --- Common Config Options ---
+crc config set memory 15000         # Set RAM (in MB, here = 15GB)
+crc config set cpus 6               # Set number of CPUs
+crc config set disk-size 100        # Set disk size (in GB)
+crc config set pull-secret-file ~/pull-secret.txt   # Provide pull secret
+crc config set enable-cluster-monitoring true       # Enable OpenShift monitoring
+crc config set kubeadmin-password mypassword        # Set custom kubeadmin password
+crc config set consent-telemetry no                 # Disable telemetry
+crc config view                     # Verify applied settings
+
+# --- Starting & Stopping ---
+crc start                           # Start the CRC cluster
+crc stop                            # Stop the CRC cluster
+crc delete                          # Delete the CRC virtual machine
+crc status                          # Check cluster status
+
+# --- Authentication & Access ---
+crc console                         # Open the OpenShift web console in browser
+crc console --credentials           # Show console login credentials
+crc oc-env                          # Show command to set up 'oc' CLI environment
+crc podman-env                      # Show command to set up Podman environment
+crc ssh                             # SSH into the CRC VM
+
+# --- Version & Update ---
+crc version                         # Show CRC, bundle, and OpenShift version
+crc update                          # Update CRC to the latest version
+crc help                            # Show help for crc commands
+
+# --- Cleanup ---
+crc cleanup                         # Clean up unused resources
+crc delete                          # Remove the CRC VM completely

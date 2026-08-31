@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mywp
+data:
+  hostname: mydb-svc
+  password: test123
+  user: root

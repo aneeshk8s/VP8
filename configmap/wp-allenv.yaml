@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: wordpress
+  name: wordpress
+spec:
+  containers:
+  - name: con1
+    image: wordpress:latest
+    ports:
+    - containerPort: 80
+    envFrom:
+    - configMapRef:
+        name: myenv 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress-svc
+spec:
+  selector:
+    app: wordpress
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: wordpress
+spec:
+  port:
+    targetPort: 80
+  to:
+    kind: ""
+    name: wordpress-svc
+    weight: null
+
