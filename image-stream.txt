@@ -1,0 +1,146 @@
+OpenShift ImageStream Rolling Update
+1. Login to the OpenShift Image Registry
+
+Connect to the internal OpenShift registry before using image mirroring.
+
+oc registry login
+
+2. Import the initial image into the ImageStream
+
+oc import-image pulls image metadata and layers from an external registry and stores the image in the OpenShift ImageStream.
+
+oc import-image orangeis:1.30.4 --from=docker.io/library/nginx:1.30.4
+
+3. Verify the ImageStream
+
+Check the ImageStream and its tags.
+
+oc describe is orangeis
+oc get istag
+
+4. Create the application from the ImageStream
+
+Deploy the application using the ImageStream tag.
+
+oc new-app --name myapp --image-stream orangeis:1.30.4
+
+5. Configure the ImageStream deployment trigger
+
+Configure the Deployment to automatically roll out when the latest ImageStream tag changes.
+
+oc set triggers deploy/myapp --remove-all
+oc set triggers deploy/myapp --from-image=orangeis:latest
+
+6. Import the new image version
+
+Import the new application image into another ImageStream tag.
+
+oc import-image orangeis:1.31.4 --from=docker.io/library/nginx:1.31.4
+
+7. Update the latest tag
+
+Move latest to the new image version. The ImageStream trigger detects the change and starts a rolling update.
+
+oc tag orangeis:1.31.4 orangeis:latest
+
+8. Monitor the rolling update
+
+Check the ImageStream and application pods.
+
+oc get pods
+oc describe is orangeis
+
+9. Verify the final ImageStream tags
+
+Confirm the expected image versions and tags.
+
+oc get istag
+oc get is
+
+Difference: oc import-image vs oc image mirror
+oc import-image
+
+Used to import an image from an external container registry into an OpenShift ImageStream.
+
+Example:
+
+oc import-image orangeis:1.31.4 --from=docker.io/library/nginx:1.31.4
+
+
+Typical use:
+
+External registry → OpenShift ImageStream
+Creates/updates an ImageStream tag
+Useful when OpenShift can access the source registry
+Good for importing new image versions
+oc image mirror
+
+Used to copy/mirror an image directly from one registry to another registry.
+
+Example from the commands used:
+
+oc image mirror docker.io/library/nginx:1.30.4 \
+default-route-openshift-image-registry.apps-crc.testing/default/orangeis:1.30.4 \
+--insecure=true --filter-by-os=linux/amd64
+
+
+Typical use:
+
+Source registry → destination registry
+Copies the image between registries
+Useful for disconnected/restricted environments or when you need explicit registry-to-registry copying
+The destination can be an OpenShift internal registry
+Simple Difference
+oc import-image
+External Registry
+      |
+      | import
+      v
+OpenShift ImageStream
+      |
+      v
+orangeis:1.31.4
+
+
+oc image mirror
+Source Registry
+      |
+      | copy/mirror
+      v
+Destination Registry
+      |
+      v
+OpenShift ImageStream/Image Repository
+
+
+In short:
+
+Command	Purpose
+oc import-image	Import an image into an OpenShift ImageStream
+oc image mirror	Copy an image from one container registry to another
+oc tag	Create/move an ImageStream tag
+oc set triggers	Configure automatic deployment rollout
+oc get pods	Monitor the rolling update
+Rolling Update Flow
+External Registry
+      |
+      | oc import-image
+      v
+ImageStream: orangeis
+      |
+      +-- 1.30.4
+      |
+      +-- 1.31.4
+      |
+      +-- latest ---> 1.31.4
+                     |
+                     | ImageStream trigger
+                     v
+                Deployment
+                     |
+                     | Rolling Update
+                     v
+                  myapp Pods
+
+
+Key point: oc import-image is primarily for bringing an image into an ImageStream, while oc image mirror is primarily for copying an image between registries. For the rolling-update workflow above, oc import-image is the simpler approach when the source registry is directly accessible.
