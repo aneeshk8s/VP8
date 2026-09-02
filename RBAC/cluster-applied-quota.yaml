@@ -1,0 +1,13 @@
+apiVersion: quota.openshift.io/v1
+kind: ClusterResourceQuota
+metadata:
+  name: mango-clusterrq
+spec:
+  quota:
+    hard:
+      cpu: "2"
+      memory: 2Gi
+  selector:
+    labels:
+      matchLabels:
+        env: mango

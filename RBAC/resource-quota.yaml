@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: mango-quota
+spec:
+  hard:
+    count/deployments.apps: "2"
+    count/pods: "10"
+    cpu: "2"
+    memory: 2Gi
