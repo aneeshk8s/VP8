@@ -1,0 +1,25 @@
+oc new-app httpd
+
+## pods are deployed now
+
+# check status of pods and its object created by oc new-app command 
+oc status
+
+## check SCC's suggestion
+
+oc status --suggest
+
+##create Service account 
+oc create sa apple
+
+# bind role with this sa
+oc adm policy add-scc-to-user anyuid -z apple (SA)
+
+## update service account name in deployment 
+
+oc set sa deployment httpd
+
+or use patch command 
+
+oc patch deployment httpd --patch '{"spec":{"templete":{"spec":{"serviceAccountName":"apple"}}}}'
+

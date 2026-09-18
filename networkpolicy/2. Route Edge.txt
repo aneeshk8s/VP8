@@ -1,0 +1,127 @@
+TLS Termination using Edge
+
+TLS is terminated at the OpenShift router. 
+The router decrypts HTTPS traffic and forwards plain HTTP traffic to the backend service/pod.
+
+Client  --- HTTPS --->  OpenShift Router  --- HTTP --->  Pod
+
+Key Points
+
+TLS certificate is configured on the Route.
+Backend application does not need TLS.
+Most commonly used option.
+Router handles encryption/decryption.
+
+Use Case
+
+When the application only supports HTTP.
+Simple TLS setup for external access.
+
+
+## deploy nginx app  NON TLS Route ########
+
+# run pod with any UID
+
+oc adm policy add-scc-to-user anyuid -z default
+
+oc create deployment nginx --image nginx --port 80
+
+oc expose deployment nginx --port 80
+
+oc expose svc nginx
+
+
+oc edit routes.route.openshift.io nginx
+
+
+Path Based Routing 
+oc expose svc nginx --path=/Aneesh  # use // if using git bash
+
+rewrite rule in case 404 nginx error
+
+oc annotate route nginx haproxy.router.openshift.io/rewrite-target=/
+ OR
+Modify NGINX config container level
+
+location /aneesh {
+    root /usr/share/nginx/html;
+}
+
+### host based ###### --port --protocol
+
+oc expose svc nginx --hostname=www.abc.com
+
+## multiple path based routing ##
+oc expose svc-1 nginx --hostname=www.abc.com --path=/shop
+oc expose svc-2 nginx --hostname=www.abc.com --path=/blog 
+
+## fine tune routes ####
+Custom Cookie Name (Session Stickiness)
+oc annotate route nginx router.openshift.io/cookie_name=myapp_cookie
+
+Route Timeout
+oc annotate route nginx haproxy.router.openshift.io/timeout=60s  #2m / 1h 
+
+Limit Route Requests (Rate Limiting)
+oc annotate route nginx haproxy.router.openshift.io/rate-limit-connections=true
+
+oc annotate route nginx haproxy.router.openshift.io/rate-limit-connections.rate-http=20  # 20 requests per second per client IP
+
+oc annotate route nginx haproxy.router.openshift.io/rate-limit-connections.concurrent-tcp=10 #A single client IP can have only 10 active connections simultaneously.
+
+
+
+
+############## TLS - Edge Route scenario ########
+
+Genrate key
+Enter 4 char. passphase 
+openssl genrsa -des3 -out myca.key 
+
+Generate public key certificate , this will be used to sign certificate.
+set CN- crc.example.com  # it can seen in browser's issued by section
+openssl req -x509 -new -key myca.key -sha256 -days 365 -out myca.pem
+
+
+# generate custom key for route 
+openssl genrsa -out tls.key 2048
+
+#genrate CSR
+set CN- tlsapp.apps-crc.testing 
+openssl req -new -key tls.key -out tls.csr
+
+# sign certificate 
+openssl x509 -req -in tls.csr -CA myca.pem -CAkey myca.key -CAcreateserial -out tls.crt -days 365 	
+
+
+######################################  Single CMD to generate Certificate ##########################################
+openssl req -x509 -newkey rsa:2048 -nodes -keyout tls.key -out tls.crt -days 365 -subj "//CN=tlsapp.apps-crc.testing"
+
+read certificate details 
+openssl x509 -in tls.crt -text -noout
+######################################################################################################################
+
+##### use certificate in Route Edge 
+
+oc create route edge --service=nginx --hostname=tlsapp.apps-crc.testing --cert=tls.crt --key=tls.key
+
+
+curl -vk https://tlsapp.apps-crc.testing
+
+see certificate here.... 
+oc get routes.route.openshift.io nginxtls -o yaml
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

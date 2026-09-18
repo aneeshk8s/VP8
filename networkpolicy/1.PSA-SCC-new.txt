@@ -1,0 +1,35 @@
+PSA
+
+Lab 1
+
+# update restricted labels in project
+pod-security.kubernetes.io/audit=restricted
+pod-security.kubernetes.io/enforce=restricted
+pod-security.kubernetes.io/warn=restricted
+
+deploy pod and see pod is getting rejected because of PSA restricted policy
+oc run app1 --image busybox -o yaml 
+
+#trouble shoot it by applying SCC context 
+
+Lab 2 
+
+#update project label to baseline 
+it will allow pod to be created but this time SCC will block your pod to runAsRoot user read logs
+ 
+* if default SCC is anyuid simple oc run will create pod in running state 
+* if default SCCC is restricted-v2 than pod will be created with error permission  denied
+oc logs pod
+
+check default policy and priority 
+#oc get scc
+
+to fix this means if you required to run application in container as root user(anyuid), follow these steps 
+
+1. create service account 
+oc create sa apple 
+
+2. bind SCC policy to this SA
+oc adm 
+
+increse priority on restricted-v2 25
